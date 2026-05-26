@@ -1,0 +1,26 @@
+name: Share Variables Between Jobs
+
+on: push
+
+jobs:
+  job1:
+    runs-on: ubuntu-latest
+    # 1. Define the outputs that this job makes available
+    outputs:
+      my_generated_id: ${{ steps.step1.outputs.generated_id }}
+    steps:
+      - id: step1
+        run: |
+          echo "Creating some data..."
+          # 2. Write the data to the $GITHUB_OUTPUT file
+          echo "generated_id=user123_abc" >> $GITHUB_OUTPUT
+
+  job2:
+    runs-on: ubuntu-latest
+    # 3. Explicitly state that this job depends on job1
+    needs: job1
+    steps:
+      - name: Use the data from job1
+        run: |
+          # 4. Access the output using the needs context
+          echo "The ID from job1 is: ${{ needs.job1.outputs.my_generated_id }}"
