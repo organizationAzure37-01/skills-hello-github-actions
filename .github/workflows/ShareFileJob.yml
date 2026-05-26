@@ -1,0 +1,33 @@
+name: Share Files Between Jobs
+
+on: push
+
+jobs:
+  build_job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create a dummy build file
+        run: echo "Compiled code here" > build-output.txt
+
+      # 1. Upload the file to the workflow run
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: my-build-artifact
+          path: build-output.txt
+
+  deploy_job:
+    runs-on: ubuntu-latest
+    needs: build_job # Ensures this runs after build_job finishes
+    steps:
+      # 2. Download the file into this runner's workspace
+      - name: Download Build Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: my-build-artifact
+
+      - name: Verify downloaded file
+        run: cat build-output.txt
